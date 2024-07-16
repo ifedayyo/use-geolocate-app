@@ -2,10 +2,21 @@ import logo from "./logo.svg";
 import "./App.css";
 import { useState } from "react";
 
-function useGeolocation(isLoading, error) {
+function useGeolocation() {
   const [isLoading, setIsLoading] = useState(false);
   const [position, setPosition] = useState({});
   const [error, setError] = useState(null);
+
+  const [countClicks, setCountClicks] = useState(0);
+
+  const { lat, lng } = position;
+
+  function getPosition() {
+    setCountClicks((count) => count + 1);
+
+    if (!navigator.geolocation)
+      return setError("Your browser does not support geolocation");
+  }
 
   setIsLoading(true);
   navigator.geolocation.getCurrentPosition(
@@ -21,24 +32,11 @@ function useGeolocation(isLoading, error) {
       setIsLoading(false);
     }
   );
-  {
-    [isLoading, position, error];
-  }
 }
 
 export default function App() {
-  const [countClicks, setCountClicks] = useState(0);
-
-  const { lat, lng } = position;
-
-  function getPosition() {
-    setCountClicks((count) => count + 1);
-
-    if (!navigator.geolocation)
-      return setError("Your browser does not support geolocation");
-  }
-
-  const [position, isLoading, error] = useGeolocation();
+  const [getPosition, isLoading, error, lat, lng, countClicks] =
+    useGeolocation();
 
   return (
     <div>
