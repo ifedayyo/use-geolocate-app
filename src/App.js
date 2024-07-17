@@ -7,19 +7,29 @@ export default function App() {
     useGeolocation();
   useEffect(
     function () {
-      async function getGPS() {
-        try {
-          const res = await fetch(
-            `https://www.openstreetmap.org/#map=16/${lat}/${lng}`
-          );
+      let isMounted = true;
 
-          const data = await res.json();
-          position(data);
-        } catch (error) {
-          console.log(error.message);
+      if (lat && lng) {
+        async function getGPS() {
+          try {
+            const res = await fetch(
+              `https://www.openstreetmap.org/#map=16/${lat}/${lng}`
+            );
+
+            const data = await res.json();
+            if (isMounted) {
+              console.log(data);
+            }
+          } catch (error) {
+            console.log(error.message);
+          }
         }
+        getGPS();
       }
-      getGPS();
+
+      return () => {
+        isMounted = false;
+      };
     },
     [lat, lng, position]
   );
