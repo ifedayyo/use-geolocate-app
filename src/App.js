@@ -1,49 +1,34 @@
-import logo from "./logo.svg";
 import "./App.css";
-import { useState } from "react";
-
-function useGeolocation() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [position, setPosition] = useState({});
-  const [error, setError] = useState(null);
-
-  const [countClicks, setCountClicks] = useState(0);
-
-  const { lat, lng } = position;
-
-  function getPosition() {
-    setCountClicks((count) => count + 1);
-
-    if (!navigator.geolocation)
-      return setError("Your browser does not support geolocation");
-  }
-
-  setIsLoading(true);
-  navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      setPosition({
-        lat: pos.coords.latitude,
-        lng: pos.coords.longitude,
-      });
-      setIsLoading(false);
-    },
-    (error) => {
-      setError(error.message);
-      setIsLoading(false);
-    }
-  );
-}
+import React, { useEffect } from "react";
+import useGeolocation from "./useGeolocateApp";
 
 export default function App() {
-  const [getPosition, isLoading, error, lat, lng, countClicks] =
+  const [isLoading, position, error, getPosition, lat, lng, countClicks] =
     useGeolocation();
+  useEffect(
+    function () {
+      async function getGPS() {
+        try {
+          const res = await fetch(
+            `https://www.openstreetmap.org/#map=16/${lat}/${lng}`
+          );
+
+          const data = await res.json();
+          position(data);
+        } catch (error) {
+          console.log(error.message);
+        }
+      }
+      getGPS();
+    },
+    [lat, lng, position]
+  );
 
   return (
     <div>
       <button onClick={getPosition} disabled={isLoading}>
         Get my position
       </button>
-
       {isLoading && <p>Loading position...</p>}
       {error && <p>{error}</p>}
       {!isLoading && !error && lat && lng && (
@@ -58,6 +43,7 @@ export default function App() {
           </a>
         </p>
       )}
+      {/*//If i do this: useEffect(function(){}, []), it might help*/}
 
       <p>You requested position {countClicks} times</p>
     </div>
